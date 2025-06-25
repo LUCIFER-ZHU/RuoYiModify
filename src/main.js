@@ -38,12 +38,16 @@ import Editor from "@/components/Editor"
 import FileUpload from "@/components/FileUpload"
 // 图片上传组件
 import ImageUpload from "@/components/ImageUpload"
-// 图片上传组件 （表格内）
-import ImageUploadGrid from "@/components/ImageUploadGrid"
 // 图片预览组件
 import ImagePreview from "@/components/ImagePreview"
 // 字典标签组件
 import DictTag from '@/components/DictTag'
+
+// 自定义
+// 图片上传组件
+import ImageUploadGrid from "@/components/Website/ImageUploadGrid"
+
+
 
 const app = createApp(App)
 
