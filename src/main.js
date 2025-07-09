@@ -26,6 +26,7 @@ import elementIcons from '@/components/SvgIcon/svgicon'
 import './permission' // permission control
 
 import { useDict } from '@/utils/dict'
+import { useDictMn } from '@/utils/dictMn'
 import { parseTime, resetForm, addDateRange, handleTree, selectDictLabel, selectDictLabels } from '@/utils/ruoyi'
 
 // 分页组件
@@ -43,16 +44,18 @@ import ImagePreview from "@/components/ImagePreview"
 // 字典标签组件
 import DictTag from '@/components/DictTag'
 
+
 // 自定义
 // 图片上传组件
 import ImageUploadGrid from "@/components/Website/ImageUploadGrid"
-
-
+import DictTagMn from "@/components/Website/DictTagMn"
+import RichTextMn from "@/components/Website/RichText"
 
 const app = createApp(App)
 
 // 全局方法挂载
 app.config.globalProperties.useDict = useDict
+app.config.globalProperties.useDictMn = useDictMn
 app.config.globalProperties.download = download
 app.config.globalProperties.parseTime = parseTime
 app.config.globalProperties.resetForm = resetForm
@@ -69,7 +72,11 @@ app.component('ImageUpload', ImageUpload)
 app.component('ImagePreview', ImagePreview)
 app.component('RightToolbar', RightToolbar)
 app.component('Editor', Editor)
+
+// 自定义
 app.component('ImageUploadGrid', ImageUploadGrid)
+app.component('DictTagMn', DictTagMn)
+app.component('RichTextMn', RichTextMn)
 
 app.use(router)
 app.use(store)

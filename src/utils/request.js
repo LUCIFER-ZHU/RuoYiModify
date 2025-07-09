@@ -22,6 +22,14 @@ const service = axios.create({
 
 // request拦截器
 service.interceptors.request.use(config => {
+  // 过滤undefined字段
+  if (config.data) {
+    Object.keys(config.data).forEach(key => {
+      if (config.data[key] === undefined) {
+        config.data[key] = ''; // 替换为字符串或 null
+      }
+    });
+  }  
   // 是否需要设置 token
   const isToken = (config.headers || {}).isToken === false
   // 是否需要防止数据重复提交

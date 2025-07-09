@@ -63,7 +63,8 @@
          </el-table-column>
          <el-table-column prop="orderNum" label="排序" width="60"></el-table-column>
          <el-table-column prop="perms" label="权限标识" :show-overflow-tooltip="true"></el-table-column>
-         <el-table-column prop="component" label="组件路径" :show-overflow-tooltip="true"></el-table-column>
+         <el-table-column prop="path" label="路由路径" :show-overflow-tooltip="true" width="250"></el-table-column>
+         <el-table-column prop="component" label="组件路径" :show-overflow-tooltip="true" width="250"></el-table-column>
          <el-table-column prop="status" label="状态" width="80">
             <template #default="scope">
                <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
@@ -74,7 +75,7 @@
                <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
+         <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width" fixed="right">
             <template #default="scope">
                <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:menu:edit']">修改</el-button>
                <el-button link type="primary" icon="Plus" @click="handleAdd(scope.row)" v-hasPermi="['system:menu:add']">新增</el-button>

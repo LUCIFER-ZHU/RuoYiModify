@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="dict-tag-mn">
     <template v-for="(item, index) in options">
-      <template v-if="values.includes(item.value)">
+      <template v-if="values.includes(Number(item.value))">
         <span
           v-if="(item.elTagType == 'default' || item.elTagType == '') && (item.elTagClass == '' || item.elTagClass == null)"
           :key="item.value"
@@ -49,7 +49,15 @@ const props = defineProps({
 
 const values = computed(() => {
   if (props.value === null || typeof props.value === 'undefined' || props.value === '') return [];
-  return Array.isArray(props.value) ? props.value.map(item => '' + item) : String(props.value).split(props.separator);
+  if (Array.isArray(props.value)) {
+    return props.value.map(item => typeof item === 'string' ? Number(item) : item);
+  }
+  // 如果是字符串，按分隔符分割后转为数字
+  if (typeof props.value === 'string') {
+    return props.value.split(props.separator).map(item => Number(item.trim()));
+  }
+  // 如果是数字，直接返回数组
+  return [Number(props.value)];
 });
 
 const unmatch = computed(() => {
@@ -59,7 +67,7 @@ const unmatch = computed(() => {
   // 传入值为数组
   let unmatch = false // 添加一个标志来判断是否有未匹配项
   values.value.forEach(item => {
-    if (!props.options.some(v => v.value === item)) {
+    if (!props.options.some(v => Number(v.value) === Number(item))) {
       unmatchArray.value.push(item)
       unmatch = true // 如果有未匹配项，将标志设置为true
     }
