@@ -95,10 +95,11 @@ export function getAssignerList(){
 }
 
 // 获取未联系客户
-export function getNoContacted(){
+export function getNoContacted(query){
   return request({
     url: '/business/customer/getNoContacted',
-    method: 'get'
+    method: 'get',
+    params: query
   })
 }
 

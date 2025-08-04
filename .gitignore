@@ -21,3 +21,9 @@ selenium-debug.log
 
 package-lock.json
 yarn.lock
+
+# Cursor rules
+.cursor/rules/my-cursor-rule.mdc
+
+# Project documentation
+promot.md

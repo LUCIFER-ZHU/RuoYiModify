@@ -4,7 +4,7 @@
       :before-upload="handleBeforeUpload" :data="data" :limit="limit" :on-error="handleUploadError"
       :on-exceed="handleExceed" ref="imageUpload" :before-remove="handleDelete" :show-file-list="true"
       :headers="headers" :file-list="fileList" :on-preview="handlePictureCardPreview"
-      :class="{ hide: fileList.length >= limit }" :disabled="disabled">
+      :class="{ hide: fileList.length >= limit || disabled}" :disabled="disabled">
       <el-icon class="avatar-uploader-icon">
         <plus />
       </el-icon>
@@ -36,7 +36,7 @@ const props = defineProps({
   // 上传接口地址
   action: {
     type: String,
-    default: "/common/upload"
+    default: "/ossUpload/upload"
   },
   // 上传携带的参数
   data: {
@@ -65,7 +65,7 @@ const props = defineProps({
   // 图片回显地址
   baseUrl : {
     type: String,
-    default: ''
+    default: import.meta.env.VITE_BASE_IMG_URL
   },
   // 是否禁用上传
   disabled : {
@@ -229,4 +229,5 @@ function listToString(list, separator) {
 :deep(.hide .el-upload--picture-card) {
   display: none;
 }
+
 </style>

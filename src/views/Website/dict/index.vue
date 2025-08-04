@@ -4,7 +4,8 @@
     <el-row>
       <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="83px" @submit.native.prevent>
         <el-form-item label="字典名称" prop="name">
-          <el-input v-model="queryParams.name" placeholder="请输入字典名称" clearable style="width: 200px" @keyup.enter="handleQuery" />
+          <el-input v-model="queryParams.name" placeholder="请输入字典名称" clearable style="width: 200px"
+            @keyup.enter="handleQuery" />
         </el-form-item>
         <!-- <el-form-item label="字典编码" prop="value">
           <el-input v-model="queryParams.value" placeholder="请输入字典编码" clearable style="width: 200px"
@@ -22,10 +23,10 @@
         </el-form-item>
       </el-form>
     </el-row>
-    
+
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAddDict" v-hasPermi="['dict:manage:add']">新增字典</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAddDict">新增字典</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button type="primary" plain icon="Sort" @click="toggleExpandAll">展开/折叠</el-button>
@@ -33,15 +34,8 @@
     </el-row>
 
     <!-- 树形表格数据 -->
-    <el-table
-      ref="tableRef"
-      v-loading="loading"
-      :data="dictList"
-      row-key="id"
-      :default-expand-all="false"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      border
-    >
+    <el-table ref="tableRef" v-loading="loading" :data="dictList" row-key="id" :default-expand-all="false"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" border>
       <el-table-column label="字典名称" prop="name" width="200">
         <template #default="scope">
           <span v-if="scope.row.level === 1">{{ scope.row.name }}</span>
@@ -56,7 +50,7 @@
       </el-table-column>
       <el-table-column label="字典项值" prop="code" width="150" align="center">
         <template #default="scope">
-          <span v-show="scope.row.level === 2">{{ scope.row.code}}</span>
+          <span v-show="scope.row.level === 2">{{ scope.row.code }}</span>
         </template>
       </el-table-column>
       <el-table-column label="备注" prop="description" width="200" align="center">
@@ -74,12 +68,12 @@
       <el-table-column label="创建时间" width="180" align="center">
         <template #default="scope">
           {{ parseTime(scope.row.createTime) }}
-        </template>        
+        </template>
       </el-table-column>
       <el-table-column label="更新时间" width="180" align="center">
         <template #default="scope">
           {{ parseTime(scope.row.updateTime) }}
-        </template>        
+        </template>
       </el-table-column>
       <el-table-column label="操作" fixed="right" width="300" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -89,27 +83,22 @@
               <el-button link type="success" icon="Search" @click="handleSearchDict(scope.row)"></el-button>
             </el-tooltip> -->
             <el-tooltip content="新增字典项" placement="top">
-              <el-button link type="success" icon="Plus" @click="handleAddDictItem(scope.row)"
-                v-hasPermi="['dict:manage:item:add']"></el-button>
+              <el-button link type="success" icon="Plus" @click="handleAddDictItem(scope.row)"></el-button>
             </el-tooltip>
             <el-tooltip content="编辑字典" placement="top">
-              <el-button link type="primary" icon="Edit" @click="handleEditDict(scope.row)"
-                v-hasPermi="['dict:manage:edit']"></el-button>
+              <el-button link type="primary" icon="Edit" @click="handleEditDict(scope.row)"></el-button>
             </el-tooltip>
             <el-tooltip content="删除字典" placement="top">
-              <el-button link type="danger" icon="Delete" @click="handleDeleteDict(scope.row)"
-                v-hasPermi="['dict:manage:delete']"></el-button>
+              <el-button link type="danger" icon="Delete" @click="handleDeleteDict(scope.row)"></el-button>
             </el-tooltip>
           </template>
           <!-- 字典项操作 -->
           <template v-else>
             <el-tooltip content="编辑字典项" placement="top">
-              <el-button link type="primary" icon="Edit" @click="handleEditDictItem(scope.row)"
-                v-hasPermi="['dict:manage:item:edit']"></el-button>
+              <el-button link type="primary" icon="Edit" @click="handleEditDictItem(scope.row)"></el-button>
             </el-tooltip>
             <el-tooltip content="删除字典项" placement="top">
-              <el-button link type="danger" icon="Delete" @click="handleDeleteDictItem(scope.row)"
-                v-hasPermi="['dict:manage:item:delete']"></el-button>
+              <el-button link type="danger" icon="Delete" @click="handleDeleteDictItem(scope.row)" ]"></el-button>
             </el-tooltip>
           </template>
         </template>
@@ -150,13 +139,13 @@
           <el-input v-model="currentDict.name" disabled />
         </el-form-item>
         <el-form-item label="字典编码" prop="value">
-          <el-input v-model="itemForm.value" disabled/>
+          <el-input v-model="itemForm.value" disabled />
         </el-form-item>
         <el-form-item label="项目标签" prop="name">
           <el-input v-model="itemForm.name" placeholder="请输入项目标签" />
         </el-form-item>
         <el-form-item label="项目值" prop="code">
-          <el-input-number v-model="itemForm.code" placeholder="请输入项目值"/>
+          <el-input-number v-model="itemForm.code" placeholder="请输入项目值" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="itemForm.status">
@@ -180,10 +169,10 @@
 
 <script setup name="DictManage">
 import { ElMessageBox } from 'element-plus';
-import { 
-  getDictTree, 
-  addDict, 
-  updateDict, 
+import {
+  getDictTree,
+  addDict,
+  updateDict,
   delDict
 } from "@/api/Website/dictManage";
 
@@ -310,7 +299,7 @@ function handleDeleteDict(row) {
         getList();
       }
     });
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 /** 新增字典项 */
@@ -327,7 +316,7 @@ function handleAddDictItem(row) {
 function handleEditDictItem(row) {
   resetItemForm();
   // 找到父字典
-  const parentDict = dictList.value.find(dict => 
+  const parentDict = dictList.value.find(dict =>
     dict.children && dict.children.some(item => item.id === row.id)
   );
   currentDict.value = parentDict || {};
@@ -349,7 +338,7 @@ function handleDeleteDictItem(row) {
         getList();
       }
     });
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 /** 提交字典表单 */
@@ -359,7 +348,7 @@ function submitDictForm() {
       submitLoading.value = true;
       const isEdit = dictForm.value.id !== undefined;
       const apiCall = isEdit ? updateDict(dictForm.value) : addDict(dictForm.value);
-      
+
       apiCall.then(response => {
         if (response.success) {
           proxy.$modal.msgSuccess(isEdit ? '修改成功' : '新增成功');
@@ -380,7 +369,7 @@ function submitItemForm() {
       submitLoading.value = true;
       const isEdit = itemForm.value.id !== undefined;
       const apiCall = isEdit ? updateDict(itemForm.value) : addDict(itemForm.value);
-      
+
       apiCall.then(response => {
         if (response.success) {
           proxy.$modal.msgSuccess(isEdit ? '修改成功' : '新增成功');
@@ -448,7 +437,7 @@ getList();
   margin-bottom: 8px;
 }
 
-.el-input-number{
+.el-input-number {
   width: 100%;
 }
 </style>

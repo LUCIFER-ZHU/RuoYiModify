@@ -50,6 +50,8 @@ import DictTag from '@/components/DictTag'
 import ImageUploadGrid from "@/components/Website/ImageUploadGrid"
 import DictTagMn from "@/components/Website/DictTagMn"
 import RichTextMn from "@/components/Website/RichText"
+import FileUploadMn from "@/components/Website/FileUploadMn"
+import DocumentPreviewMn from "@/components/Website/DocumentPreviewMn"
 
 const app = createApp(App)
 
@@ -77,6 +79,8 @@ app.component('Editor', Editor)
 app.component('ImageUploadGrid', ImageUploadGrid)
 app.component('DictTagMn', DictTagMn)
 app.component('RichTextMn', RichTextMn)
+app.component('FileUploadMn', FileUploadMn)
+app.component('DocumentPreviewMn', DocumentPreviewMn)
 
 app.use(router)
 app.use(store)

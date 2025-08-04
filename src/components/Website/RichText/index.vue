@@ -1,5 +1,5 @@
 <template>
-  <div style="border: 1px solid #ccc;height: 100%;">
+  <div style="border: 1px solid #ccc;height: 100%;" class="rich-text-mn">
     <Toolbar :editor="editorRef" :default-config="toolbarConfig" style="border-bottom: 1px solid #ccc;" />
     <Editor v-model="valueHtml" :default-config="editorConfig"
       :style="{ 'height': `${height}px`, 'overflow-y': 'hidden' }" @on-created="handleCreated" @on-change="handleChange"

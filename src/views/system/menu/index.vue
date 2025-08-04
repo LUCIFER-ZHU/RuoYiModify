@@ -55,15 +55,23 @@
          :default-expand-all="isExpandAll"
          :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       >
-         <el-table-column prop="menuName" label="菜单名称" :show-overflow-tooltip="true" width="160"></el-table-column>
+         <el-table-column prop="menuName" label="菜单名称" :show-overflow-tooltip="true" width="250"></el-table-column>
+         <el-table-column prop="menuType" label="菜单类型" width="100" align="center">
+            <template #default="scope">
+               <el-tag type="primary" v-if="scope.row.menuType === 'M'">目录</el-tag>
+               <el-tag type="success" v-else-if="scope.row.menuType === 'C'">菜单</el-tag>
+               <el-tag type="danger" v-else-if="scope.row.menuType === 'F'">按钮</el-tag>
+            </template>
+         </el-table-column>
          <el-table-column prop="icon" label="图标" align="center" width="100">
             <template #default="scope">
                <svg-icon :icon-class="scope.row.icon" />
             </template>
          </el-table-column>
          <el-table-column prop="orderNum" label="排序" width="60"></el-table-column>
-         <el-table-column prop="perms" label="权限标识" :show-overflow-tooltip="true"></el-table-column>
+         <el-table-column prop="perms" label="权限标识" :show-overflow-tooltip="true" width="200"></el-table-column>
          <el-table-column prop="path" label="路由路径" :show-overflow-tooltip="true" width="250"></el-table-column>
+         <el-table-column prop="routeName" label="路由名称（不能重复）" :show-overflow-tooltip="true" width="180"></el-table-column>
          <el-table-column prop="component" label="组件路径" :show-overflow-tooltip="true" width="250"></el-table-column>
          <el-table-column prop="status" label="状态" width="80">
             <template #default="scope">
