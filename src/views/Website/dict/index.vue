@@ -98,7 +98,7 @@
               <el-button link type="primary" icon="Edit" @click="handleEditDictItem(scope.row)"></el-button>
             </el-tooltip>
             <el-tooltip content="删除字典项" placement="top">
-              <el-button link type="danger" icon="Delete" @click="handleDeleteDictItem(scope.row)" ]"></el-button>
+              <el-button link type="danger" icon="Delete" @click="handleDeleteDictItem(scope.row)" ></el-button>
             </el-tooltip>
           </template>
         </template>

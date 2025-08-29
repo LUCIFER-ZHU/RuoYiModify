@@ -9,11 +9,10 @@
 </template>
 
 <script setup>
-import { isExternal } from "@/utils/validate";
 import '@wangeditor/editor/dist/css/style.css'
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
 import { getToken } from "@/utils/auth";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage } from "element-plus";
 import axios from 'axios';
 
 const webHost = import.meta.env.VITE_APP_BASE_API;
@@ -233,9 +232,9 @@ const editorConfig = {
     // }
   },
   hoverbarKeys: {
-    image: {
-      menuKeys: []
-    }
+    // image: {
+    //   menuKeys: []
+    // }
   }
 }
 

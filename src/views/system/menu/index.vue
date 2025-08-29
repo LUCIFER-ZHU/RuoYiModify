@@ -202,7 +202,7 @@
                            组件路径
                         </span>
                      </template>
-                     <el-input v-model="form.component" placeholder="请输入组件路径" />
+                     <el-input v-model.trim="form.component" placeholder="请输入组件路径" @blur="form.component = (form.component || '').trim()" />
                   </el-form-item>
                </el-col>
                <el-col :span="12" v-if="form.menuType != 'M'">
