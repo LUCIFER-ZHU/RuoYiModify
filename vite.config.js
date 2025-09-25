@@ -1,65 +1,88 @@
 import { defineConfig, loadEnv } from 'vite'
 import path from 'path'
 import createVitePlugins from './vite/plugins'
+import { visualizer } from 'rollup-plugin-visualizer'
+import viteCompression from 'vite-plugin-compression'
+import importToCDN from 'vite-plugin-cdn-import'
 
 const baseUrl = 'http://localhost:8080' // 后端接口
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd())
   const { VITE_APP_ENV } = env
+
+  const isProd = command === 'build'
+
   return {
-    // 部署生产环境和开发环境下的URL。
-    // 默认情况下，vite 会假设你的应用是被部署在一个域名的根路径上
-    // 例如 https://www.ruoyi.vip/。如果应用被部署在一个子路径上，你就需要用这个选项指定这个子路径。例如，如果你的应用被部署在 https://www.ruoyi.vip/admin/，则设置 baseUrl 为 /admin/。
     base: VITE_APP_ENV === 'production' ? '/' : '/',
-    plugins: createVitePlugins(env, command === 'build'),
+    plugins: [
+      createVitePlugins(env, command === 'build'),
+
+      // 打包体积分析
+      // isProd &&
+      //   visualizer({
+      //     filename: 'stats.html',
+      //     open: false,
+      //     gzipSize: true,
+      //     brotliSize: true
+      //   }),
+
+      // gzip 压缩
+      viteCompression({
+        algorithm: 'gzip',
+        ext: '.gz',
+        deleteOriginFile: false // 保留源文件，Nginx 自动选择 gzip
+      }),
+      // brotli 压缩
+      viteCompression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+        deleteOriginFile: false
+      })
+    ],
     resolve: {
-      // https://cn.vitejs.dev/config/#resolve-alias
       alias: {
-        // 设置路径
         '~': path.resolve(__dirname, './'),
-        // 设置别名
         '@': path.resolve(__dirname, './src')
       },
-      // https://cn.vitejs.dev/config/#resolve-extensions
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
     },
-    // 打包配置
     build: {
-      // https://vite.dev/config/build-options.html
       sourcemap: command === 'build' ? false : 'inline',
       outDir: 'dist',
       assetsDir: 'assets',
       chunkSizeWarningLimit: 2000,
+      reportCompressedSize: true,
       rollupOptions: {
         output: {
           chunkFileNames: 'static/js/[name]-[hash].js',
           entryFileNames: 'static/js/[name]-[hash].js',
-          assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
+          assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
+          // 🔑 关键：拆包
+          manualChunks: {
+            vue: ['vue', 'vue-router', 'pinia'],
+            echarts: ['echarts'],
+            utils: ['axios', 'lodash-es', 'js-cookie']
+          }
         }
       }
     },
-    // vite 相关配置
     server: {
       port: 8080,
       host: true,
       open: true,
       proxy: {
-        // https://cn.vitejs.dev/config/#server-proxy
         '/dev-api': {
           target: baseUrl,
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/dev-api/, '')
         },
-         // springdoc proxy
-         '^/v3/api-docs/(.*)': {
+        '^/v3/api-docs/(.*)': {
           target: baseUrl,
-          changeOrigin: true,
+          changeOrigin: true
         }
       }
     },
-    //fix:error:stdin>:7356:1: warning: "@charset" must be the first rule in the file
     css: {
       postcss: {
         plugins: [
@@ -68,7 +91,7 @@ export default defineConfig(({ mode, command }) => {
             AtRule: {
               charset: (atRule) => {
                 if (atRule.name === 'charset') {
-                  atRule.remove();
+                  atRule.remove()
                 }
               }
             }

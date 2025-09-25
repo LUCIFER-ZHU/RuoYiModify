@@ -17,7 +17,7 @@ const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   baseURL: import.meta.env.VITE_APP_BASE_API,
   // 超时
-  timeout: 10000
+  timeout: 250000
 })
 
 // request拦截器
@@ -118,12 +118,14 @@ service.interceptors.response.use(res => {
   error => {
     console.log('err' + error)
     let { message } = error;
+    // 拼接请求的完整URL（baseURL + url），便于定位问题
+    const fullUrl = ((error && error.config && (error.config.baseURL || '')) || '') + ((error && error.config && error.config.url) || '')
     if (message == "Network Error") {
-      message = "后端接口连接异常";
+      message = "后端接口连接异常" + (fullUrl ? `（${fullUrl}）` : "");
     } else if (message.includes("timeout")) {
-      message = "系统接口请求超时";
+      message = "系统接口请求超时" + (fullUrl ? `（${fullUrl}）` : "");
     } else if (message.includes("Request failed with status code")) {
-      message = "系统接口" + message.substr(message.length - 3) + "异常";
+      message = "系统接口" + message.substr(message.length - 3) + "异常" + (fullUrl ? `（${fullUrl}）` : "");
     }
     ElMessage({ message: message, type: 'error', duration: 5 * 1000 })
     return Promise.reject(error)

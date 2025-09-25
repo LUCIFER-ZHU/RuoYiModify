@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, defineAsyncComponent  } from 'vue'
 
 import Cookies from 'js-cookie'
 
@@ -6,6 +6,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import locale from 'element-plus/es/locale/lang/zh-cn'
+import horizontalScroll from 'el-table-horizontal-scroll'
 
 import '@/assets/styles/index.scss' // global css
 
@@ -24,6 +25,9 @@ import SvgIcon from '@/components/SvgIcon'
 import elementIcons from '@/components/SvgIcon/svgicon'
 
 import './permission' // permission control
+
+// 统一错误处理
+import ErrorHandler from '@/utils/errorHandler'
 
 import { useDict } from '@/utils/dict'
 import { useDictMn } from '@/utils/dictMn'
@@ -51,7 +55,12 @@ import ImageUploadGrid from "@/components/Website/ImageUploadGrid"
 import DictTagMn from "@/components/Website/DictTagMn"
 import RichTextMn from "@/components/Website/RichText"
 import FileUploadMn from "@/components/Website/FileUploadMn"
-import DocumentPreviewMn from "@/components/Website/DocumentPreviewMn"
+// 异步组件
+const asyncComponents = {
+  DocumentPreviewMn: () => import('@/components/Website/DocumentPreviewMn'),
+}
+
+
 
 const app = createApp(App)
 
@@ -65,6 +74,10 @@ app.config.globalProperties.handleTree = handleTree
 app.config.globalProperties.addDateRange = addDateRange
 app.config.globalProperties.selectDictLabel = selectDictLabel
 app.config.globalProperties.selectDictLabels = selectDictLabels
+
+// 全局错误上报方法
+app.config.globalProperties.$reportError = ErrorHandler.reportError
+app.config.globalProperties.$getErrorStats = ErrorHandler.getErrorStats
 
 // 全局组件挂载
 app.component('DictTag', DictTag)
@@ -80,13 +93,17 @@ app.component('ImageUploadGrid', ImageUploadGrid)
 app.component('DictTagMn', DictTagMn)
 app.component('RichTextMn', RichTextMn)
 app.component('FileUploadMn', FileUploadMn)
-app.component('DocumentPreviewMn', DocumentPreviewMn)
+// 遍历注册异步组件
+Object.entries(asyncComponents).forEach(([name, loader]) => {
+  app.component(name, defineAsyncComponent(loader))
+})
 
 app.use(router)
 app.use(store)
 app.use(plugins)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
+app.use(horizontalScroll)
 
 directive(app)
 
@@ -95,6 +112,14 @@ app.use(ElementPlus, {
   locale: locale,
   // 支持 large、default、small
   size: Cookies.get('size') || 'default'
+})
+
+// 初始化错误处理器
+ErrorHandler.init(app, {
+  reportUrl: '/api/error/report', // 错误上报接口地址
+  enableConsoleLog: true, // 开发环境启用控制台日志
+  enableNotification: true, // 启用用户通知
+  maxQueueSize: 50 // 错误队列最大长度
 })
 
 app.mount('#app')

@@ -6,8 +6,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build:prod": "vite build",
+    "dev": "vite --mode development",
+    "dev2": "vite --mode development2",
+    "build": "vite build",
     "build:dev": "vite build --mode development",
     "build:stage": "vite build --mode staging",
     "preview": "vite preview"
@@ -23,11 +24,12 @@
     "@vue-office/pdf": "^2.0.10",
     "@vueup/vue-quill": "1.2.0",
     "@vueuse/core": "10.11.0",
+    "@wangeditor-next/editor": "^5.6.45",
     "@wangeditor-next/editor-for-vue": "^5.1.14",
-    "@wangeditor/editor": "^5.1.23",
     "axios": "0.28.1",
     "clipboard": "2.0.11",
     "echarts": "5.5.1",
+    "el-table-horizontal-scroll": "^1.2.5",
     "element-plus": "2.10.4",
     "event-source-polyfill": "^1.0.31",
     "file-saver": "2.0.5",
@@ -48,10 +50,12 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.0.5",
+    "rollup-plugin-visualizer": "^6.0.3",
     "sass": "1.77.5",
     "unplugin-auto-import": "0.17.6",
     "unplugin-vue-setup-extend-plus": "1.0.1",
     "vite": "5.3.2",
+    "vite-plugin-cdn-import": "^1.0.1",
     "vite-plugin-compression": "0.5.1",
     "vite-plugin-svg-icons": "2.0.1"
   },

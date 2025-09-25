@@ -23,7 +23,7 @@
     <div class="el-upload__tip" v-if="showTip && !disabled">
       请上传
       <template v-if="fileSize"> 大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b> </template>
-      <template v-if="fileType"> 格式为 <b style="color: #f56c6c">{{ fileType.join("/") }}</b> </template>
+      <template v-if="fileType"> 格式为 <b style="color: #f56c6c">{{ fileType.join("、") }}</b> </template>
       的文件
     </div>
     <!-- 文件列表 -->
@@ -33,31 +33,38 @@
           <span class="el-icon-document"> {{ getFileName(file.name) }} </span>
         </el-link>
         <div class="ele-upload-list__item-content-action">
+          <!-- 预览在禁用状态也可用 -->
           <el-link underline="never" @click="handlePreview(file)" type="primary" v-if="file.url">预览</el-link>
+          <!-- 删除仅在未禁用时显示 -->
           <el-link underline="never" @click="handleDelete(index)" type="danger" v-if="!disabled">删除</el-link>
         </div>
       </li>
     </transition-group>
   </div>
-  <DocumentPreviewMn
-    v-model:visible="previewVisible"
-    :file-url="previewFileUrl"
-    :file-type="previewFileType"
-  />
+  <!-- 预览弹窗 -->
+  <el-dialog v-model="previewVisible" title="文件预览" width="800px" append-to-body>
+    <img v-if="isImageFile(previewFileUrl)" :src="previewFileUrl"
+      style="display: block; max-width: 100%; margin: 0 auto" />
+    <iframe v-else-if="isPdfFile(previewFileUrl)" :src="previewFileUrl"
+      style="width: 100%; height: 600px; border: none;" />
+    <div v-else style="text-align: center; padding: 50px;">
+      <p>该文件类型不支持预览</p>
+      <el-button type="primary" @click="downloadFile(previewFileUrl)">下载文件</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script setup>
 import { getCurrentInstance, ref, computed, watch } from "vue";
 import { getToken } from "@/utils/auth";
 import { toRaw } from 'vue';
-import DocumentPreviewMn from "@/components/Website/DocumentPreviewMn/index.vue";
 
 const props = defineProps({
   modelValue: [String, Object, Array],
   // 上传接口地址
   action: {
     type: String,
-    default: "/ossUpload/uploadPdf"
+    default: "/ossUpload/uploadFiles"
   },
   // 上传携带的参数
   data: {
@@ -71,12 +78,28 @@ const props = defineProps({
   // 大小限制(MB)
   fileSize: {
     type: Number,
-    default: 5
+    default: 10
   },
-  // 文件类型, 例如['png', 'jpg', 'jpeg']
+  // 文件类型（MIME），例如 ['application/pdf', 'image/png']
   fileType: {
     type: Array,
-    default: () => ["doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "pdf"]
+    default: () => [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/plain",
+      "application/pdf",
+      // 图片类 MIME（新增）
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/bmp",
+      "image/webp",
+      "image/svg+xml"
+    ]
   },
   // 是否显示提示
   isShowTip: {
@@ -107,6 +130,16 @@ const showTip = computed(
   () => props.isShowTip && (props.fileType || props.fileSize)
 );
 
+// 根据 fileType 生成 accept 属性字符串
+const acceptAttr = computed(() => {
+  try {
+    if (!Array.isArray(props.fileType) || props.fileType.length === 0) return undefined;
+    return props.fileType.join(',');
+  } catch (e) {
+    return undefined;
+  }
+});
+
 watch(() => props.modelValue, val => {
   if (val) {
     let temp = 1;
@@ -130,12 +163,11 @@ watch(() => props.modelValue, val => {
 
 // 上传前校检格式和大小
 function handleBeforeUpload(file) {
-  // 校检文件类型
+  // 使用 MIME 类型进行校验（不再使用文件后缀名）
   if (props.fileType.length) {
-    const fileName = file.name.split('.');
-    const fileExt = fileName[fileName.length - 1];
-    const isTypeOk = props.fileType.indexOf(fileExt) >= 0;
-    if (!isTypeOk) {
+    // 直接使用 props.fileType 作为允许的 MIME 列表
+    const allowMimes = new Set(props.fileType.map(t => String(t).toLowerCase()));
+    if (!allowMimes.has(String(file.type).toLowerCase())) {
       proxy.$modal.msgError(`文件格式不正确，请上传${props.fileType.join("/")}格式文件!`);
       return false;
     }
@@ -228,12 +260,53 @@ const previewVisible = ref(false);
 const previewFileUrl = ref("");
 const previewFileType = ref("");
 
-// 处理预览
+/**
+ * 处理文件预览
+ * 支持图片直接展示、PDF 内嵌预览，其他类型提供下载
+ * @param {Object} file - 文件对象（包含url/name等字段）
+ * @returns {void}
+ */
 function handlePreview(file) {
+  if (!file || !file.url) return;
   previewFileUrl.value = baseUrl + file.url;
-  const ext = file.url.split(".").pop().toLowerCase();
+  const ext = (file.url.split(".").pop() || '').toLowerCase();
   previewFileType.value = ext;
   previewVisible.value = true;
+}
+
+/**
+ * 判断是否为图片文件
+ * @param {string} url - 文件URL
+ * @returns {boolean} 是否为图片文件
+ */
+function isImageFile(url) {
+  if (!url) return false;
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+  const extension = url.split('.').pop()?.toLowerCase();
+  return imageExtensions.includes(extension);
+}
+
+/**
+ * 判断是否为PDF文件
+ * @param {string} url - 文件URL
+ * @returns {boolean} 是否为PDF文件
+ */
+function isPdfFile(url) {
+  if (!url) return false;
+  return url.toLowerCase().endsWith('.pdf');
+}
+
+/**
+ * 下载文件
+ * @param {string} url - 文件URL
+ */
+function downloadFile(url) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = url.split('/').pop() || 'download';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 </script>
 

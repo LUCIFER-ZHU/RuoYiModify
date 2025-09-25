@@ -5,11 +5,15 @@
       :style="{ 'height': `${height}px`, 'overflow-y': 'hidden' }" @on-created="handleCreated" @on-change="handleChange"
       @on-destroyed="handleDestroyed" @on-focus="handleFocus" @on-blur="handleBlur" @custom-alert="customAlert"
       @custom-paste="customPaste" />
+    <!-- 图片预览弹窗 -->
+    <el-dialog v-model="imgPreviewVisible" title="图片预览" width="800px" append-to-body>
+      <img v-if="imgPreviewUrl" :src="imgPreviewUrl" style="display:block;max-width:100%;margin:0 auto;" />
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import '@wangeditor/editor/dist/css/style.css'
+  import '@wangeditor-next/editor/dist/css/style.css' // 引入 css
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
 import { getToken } from "@/utils/auth";
 import { ElMessage } from "element-plus";
@@ -17,7 +21,7 @@ import axios from 'axios';
 
 const webHost = import.meta.env.VITE_APP_BASE_API;
 const obsHost = import.meta.env.VITE_BASE_IMG_URL;
-const uploadUrl = webHost + '/ossUpload/upload';
+const uploadUrl = webHost + '/ossUpload/uploadFiles';
 
 const { proxy } = getCurrentInstance()
 const emit = defineEmits(['update:modelValue'])
@@ -42,8 +46,16 @@ const props = defineProps({
 // 编辑器实例，必须用 shallowRef，重要！
 const editorRef = shallowRef()
 const height = ref(props.height)
+
 // 内容 HTML
-const valueHtml = ref(props.modelValue)
+const valueHtml = ref('')
+
+// 图片预览状态
+const imgPreviewVisible = ref(false)
+const imgPreviewUrl = ref('')
+
+// 记录已绑定的点击事件处理器，便于卸载
+let unbindImgClick = null
 
 watch(
   () => valueHtml.value,
@@ -54,9 +66,11 @@ watch(
 watch(
   () => props.modelValue,
   (newValue) => {
-    editorRef.value.restoreSelection();  
-    valueHtml.value = newValue
-  }
+    if (newValue !== valueHtml.value) {
+      valueHtml.value = newValue
+    }
+  },
+  { immediate: true }
 )
 
 onMounted(() => { })
@@ -254,7 +268,7 @@ editorConfig.MENU_CONF.uploadImage.customUpload = async (file, insertFn) => {
 
     // 处理上传成功后的逻辑
     if (response.status === 200) {
-      const url = obsHost + response.data.msg; // 上传成功后返回的图片URL
+      const url = obsHost + response.data?.data?.url; // 上传成功后返回的图片URL
       insertFn(url, '', ''); // 插入图片到编辑器中
     } else {
       // 处理上传失败的情况
@@ -282,12 +296,39 @@ const handleCreated = (editor) => {
   } else {
     editor.enable()
   }
+
+  // 绑定图片点击预览：使用官方 API 获取可编辑容器并代理 <img> 点击
+  try {
+    const contentArea = editor.getEditableContainer && editor.getEditableContainer();
+    if (contentArea) {
+      const handler = (e) => {
+        const target = e.target;
+        if (target && target.tagName === 'IMG') {
+          imgPreviewUrl.value = target.getAttribute('src') || '';
+          if (imgPreviewUrl.value) {
+            imgPreviewVisible.value = true;
+          }
+        }
+      };
+      contentArea.addEventListener('click', handler);
+      // 缓存解绑函数
+      unbindImgClick = () => contentArea.removeEventListener('click', handler);
+    }
+  } catch (err) {
+    // 忽略非关键错误
+    console.warn('绑定图片预览事件失败', err);
+  }
 }
 const handleChange = (editor) => {
   // console.log('change:', editor.getHtml())
 }
 const handleDestroyed = (editor) => {
   // console.log('destroyed', editor)
+  // 卸载图片点击事件
+  try {
+    unbindImgClick && unbindImgClick();
+    unbindImgClick = null;
+  } catch (_) {}
 }
 const handleFocus = (editor) => {
   //  console.log('focus', editor)
@@ -307,6 +348,17 @@ const customPaste = (editor, event, callback) => {
   // callback(false) // 返回 false ，阻止默认粘贴行为
   callback(true)
   // 返回 true ，继续默认的粘贴行为
+}
+
+/**
+ * 主动触发一次图片点击预览（供外部调试/扩展）
+ * @param {string} url 图片地址
+ * @returns {void}
+ */
+function previewImage(url) {
+  if (!url) return;
+  imgPreviewUrl.value = url;
+  imgPreviewVisible.value = true;
 }
 </script>
 

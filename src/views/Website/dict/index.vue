@@ -34,8 +34,8 @@
     </el-row>
 
     <!-- 树形表格数据 -->
-    <el-table ref="tableRef" v-loading="loading" :data="dictList" row-key="id" :default-expand-all="false"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" border>
+    <el-table v-horizontal-scroll ref="tableRef" v-loading="loading" :data="dictList" row-key="id" :default-expand-all="false"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" border max-height="700">
       <el-table-column label="字典名称" prop="name" width="200">
         <template #default="scope">
           <span v-if="scope.row.level === 1">{{ scope.row.name }}</span>

@@ -178,3 +178,16 @@ aside {
     margin-bottom: 10px;
   }
 }
+
+// 限制表格内图片大小
+.el-table {
+  .upload-image-list {
+    justify-content: center;
+    align-items: center;
+
+    .custom-file-item {
+      width: 100px !important;
+      height: 100px !important;
+    }
+  }
+}

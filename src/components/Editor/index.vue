@@ -14,7 +14,21 @@
       <i ref="uploadRef" class="editor-img-uploader"></i>
     </el-upload>
   </div>
-  <div class="editor">
+  <!-- 加载状态 -->
+  <div v-if="isLoading" class="editor-loading">
+    <el-icon class="is-loading"><Loading /></el-icon>
+    <span>编辑器加载中...</span>
+  </div>
+  
+  <!-- 错误状态 -->
+  <div v-else-if="loadError" class="editor-error">
+    <el-icon><Warning /></el-icon>
+    <span>{{ loadError }}</span>
+    <el-button type="primary" size="small" @click="loadQuillEditor">重试</el-button>
+  </div>
+  
+  <!-- 编辑器组件 -->
+  <div class="editor" v-else-if="QuillEditor">
     <quill-editor
       ref="quillEditorRef"
       v-model:content="content"
@@ -28,8 +42,6 @@
 
 <script setup>
 import axios from 'axios';
-import { QuillEditor } from "@vueup/vue-quill";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { getToken } from "@/utils/auth";
 
 const { proxy } = getCurrentInstance();
@@ -112,6 +124,54 @@ watch(() => props.modelValue, (v) => {
     content.value = v == undefined ? "<p></p>" : v;
   }
 }, { immediate: true });
+
+
+const QuillEditor = ref(null);
+const quillCssLoaded = ref(false);
+const isLoading = ref(false);
+const loadError = ref(null);
+
+/**
+ * 动态加载Quill编辑器组件和样式
+ * @description 按需加载@vueup/vue-quill组件，避免首屏加载过重
+ * @returns {Promise<void>}
+ * @throws {Error} 当组件加载失败时抛出错误
+ */
+const loadQuillEditor = async () => {
+  if (QuillEditor.value || isLoading.value) return;
+  
+  try {
+    isLoading.value = true;
+    loadError.value = null;
+    
+    // 动态导入Quill编辑器组件
+    const module = await import("@vueup/vue-quill");
+    QuillEditor.value = module.QuillEditor;
+
+    // 动态加载CSS样式（使用CDN或相对路径）
+    if (!quillCssLoaded.value) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      // 优先使用CDN，生产环境更稳定
+      link.href = "https://cdn.jsdelivr.net/npm/@vueup/vue-quill@1.2.0/dist/vue-quill.snow.css";
+      link.onerror = () => {
+        // CDN失败时使用本地路径
+        link.href = "/node_modules/@vueup/vue-quill/dist/vue-quill.snow.css";
+      };
+      document.head.appendChild(link);
+      quillCssLoaded.value = true;
+    }
+  } catch (error) {
+    console.error('Quill编辑器加载失败:', error);
+    loadError.value = error.message || '编辑器加载失败';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadQuillEditor();
+});
 
 // 如果设置了上传地址则自定义图片上传事件
 onMounted(() => {
@@ -198,6 +258,42 @@ function insertImage(file) {
 <style>
 .editor-img-uploader {
   display: none;
+}
+
+/* 编辑器加载状态样式 */
+.editor-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #909399;
+  font-size: 14px;
+}
+
+.editor-loading .el-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* 编辑器错误状态样式 */
+.editor-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 40px 20px;
+  color: #f56c6c;
+  font-size: 14px;
+  text-align: center;
+}
+
+.editor-error .el-icon {
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.editor-error .el-button {
+  margin-top: 12px;
 }
 .editor, .ql-toolbar {
   white-space: pre-wrap !important;

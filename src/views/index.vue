@@ -2,7 +2,7 @@
   <div class="app-container home">
     <img
       class="full-screen-image"
-      src="https://minnuogas.com/wp-content/uploads/2024/03/20240325173958.jpg"
+      src="@/assets/images/welcome.png"
     />
   </div>
 </template>
@@ -17,6 +17,12 @@ function goTarget(url) {
 
 <style scoped lang="scss">
 .home {
+  text-align: center;
+
+  .full-screen-image{
+    width: 70%;
+  }
+
   blockquote {
     padding: 10px 20px;
     margin: 0 0 20px;
