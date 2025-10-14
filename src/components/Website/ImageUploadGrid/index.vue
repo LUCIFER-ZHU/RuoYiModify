@@ -3,16 +3,23 @@
     <div class="upload-image-list">
       <!-- 自定义文件列表显示 -->
       <div v-if="fileList.length > 0" class="custom-file-list">
-        <div v-for="(file, index) in fileList" :key="index" class="custom-file-item"
-          @click="handlePictureCardPreview(file)">
-          <div v-if="isPdfFile(file.url)" class="pdf-file-item">
+        <div v-for="(file, index) in fileList" :key="index" class="custom-file-item">
+          <div v-if="isPdfFile(file.url)" class="pdf-file-item" @click.stop="handlePictureCardPreview(file)">
             <el-icon class="pdf-icon">
               <Document />
             </el-icon>
             <span class="file-name">{{ file.name || getFileName(file.url) }}</span>
           </div>
           <div v-else class="image-file-item">
-            <img :src="file.url" :alt="file.name" class="file-preview" />
+            <el-image 
+              :src="file.url" 
+              :alt="file.name" 
+              class="file-preview"
+              :preview-src-list="imageList"
+              :initial-index="imageList.indexOf(file.url)"
+              :preview-teleported="true"
+              fit="cover"
+            />
           </div>
           <el-button v-if="!disabled" type="danger" size="small" class="delete-btn" @click.stop="handleDelete(file)"
             icon="Delete" />
@@ -42,10 +49,9 @@
       的文件
     </div>
 
+    <!-- 预览pdf弹窗 -->
     <el-dialog v-model="dialogVisible" title="预览" width="800px" append-to-body>
-      <img v-if="isImageFile(dialogImageUrl)" :src="dialogImageUrl"
-        style="display: block; max-width: 100%; margin: 0 auto" />
-      <iframe v-else-if="isPdfFile(dialogImageUrl)" :src="dialogImageUrl"
+      <iframe v-if="isPdfFile(dialogImageUrl)" :src="dialogImageUrl"
         style="width: 100%; height: 600px; border: none;" />
       <div v-else style="text-align: center; padding: 50px;">
         <p>该文件类型不支持预览</p>
@@ -113,9 +119,24 @@ const baseUrl = props.baseUrl || import.meta.env.VITE_APP_BASE_API;
 const uploadImgUrl = ref(import.meta.env.VITE_APP_BASE_API + props.action); // 上传的图片服务器地址
 const headers = ref({ Authorization: "Bearer " + getToken() });
 const fileList = ref([]);
+
+/**
+ * 是否显示上传提示
+ * @returns {boolean} 是否显示提示
+ */
 const showTip = computed(
   () => props.isShowTip && (props.fileType || props.fileSize)
 );
+
+/**
+ * 获取所有图片文件的URL列表（用于预览）
+ * @returns {Array<string>} 图片URL列表
+ */
+const imageList = computed(() => {
+  return fileList.value
+    .filter(file => !isPdfFile(file.url))
+    .map(file => file.url);
+});
 
 watch(() => props.modelValue, val => {
   if (val) {
@@ -148,7 +169,11 @@ watch(() => props.modelValue, val => {
   }
 }, { deep: true, immediate: true });
 
-// 上传前loading加载
+/**
+ * 上传前loading加载
+ * @param {File} file - 上传的文件对象
+ * @returns {boolean} 是否允许上传
+ */
 function handleBeforeUpload(file) {
   // 仅使用 MIME 类型进行校验，不使用文件后缀名
   let isValidFile = false;
@@ -179,12 +204,18 @@ function handleBeforeUpload(file) {
   number.value++;
 }
 
-// 文件个数超出
+/**
+ * 文件个数超出限制时的处理
+ */
 function handleExceed() {
   proxy.$modal.msgError(`上传文件数量不能超过 ${props.limit} 个!`);
 }
 
-// 上传成功回调
+/**
+ * 上传成功回调
+ * @param {Object} res - 服务器响应数据
+ * @param {File} file - 上传的文件对象
+ */
 function handleUploadSuccess(res, file) {
   console.log('imageUploadGrid', res);
   if (res.code === 200) {
@@ -212,7 +243,11 @@ function handleUploadSuccess(res, file) {
   }
 }
 
-// 删除图片
+/**
+ * 删除图片
+ * @param {Object} file - 要删除的文件对象
+ * @returns {boolean} 是否成功删除
+ */
 function handleDelete(file) {
   const findex = fileList.value.map(f => f.name).indexOf(file.name);
   if (findex > -1 && uploadList.value.length === number.value) {
@@ -222,7 +257,9 @@ function handleDelete(file) {
   }
 }
 
-// 上传结束处理
+/**
+ * 上传结束处理
+ */
 function uploadedSuccessfully() {
   if (number.value > 0 && uploadList.value.length === number.value) {
     fileList.value = fileList.value.filter(f => f.url !== undefined).concat(uploadList.value);
@@ -233,16 +270,24 @@ function uploadedSuccessfully() {
   }
 }
 
-// 上传失败
+/**
+ * 上传失败处理
+ */
 function handleUploadError() {
   proxy.$modal.msgError("上传文件失败");
   proxy.$modal.closeLoading();
 }
 
-// 预览
+/**
+ * 处理预览点击（仅用于PDF文件）
+ * 图片预览由el-image的preview-src-list自动处理
+ * @param {Object} file - 文件对象
+ */
 function handlePictureCardPreview(file) {
-  dialogImageUrl.value = file.url;
-  dialogVisible.value = true;
+  if (isPdfFile(file?.url)) {
+    dialogImageUrl.value = file.url;
+    dialogVisible.value = true;
+  }
 }
 
 /**

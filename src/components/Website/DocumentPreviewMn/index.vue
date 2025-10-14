@@ -26,6 +26,11 @@ const props = defineProps({
 });
 const emit = defineEmits(["update:visible"]);
 
+// 顶部只定义一次
+const DocxViewer = defineAsyncComponent(() => import('@vue-office/docx'));
+const ExcelViewer = defineAsyncComponent(() => import('@vue-office/excel'));
+const PdfViewer = defineAsyncComponent(() => import('@vue-office/pdf'));
+
 const innerFileUrl = ref("");
 
 // 控制对话框显示
@@ -55,15 +60,9 @@ const previewComponent = computed(() => {
     type = ext;
   }
 
-  if (["doc", "docx"].includes(type)) {
-    return defineAsyncComponent(() => import("@vue-office/docx"));
-  }
-  if (["xls", "xlsx"].includes(type)) {
-    return defineAsyncComponent(() => import("@vue-office/excel"));
-  }
-  if (["pdf"].includes(type)) {
-    return defineAsyncComponent(() => import("@vue-office/pdf"));
-  }
+  if (['doc','docx'].includes(type)) return DocxViewer;
+  if (['xls','xlsx'].includes(type)) return ExcelViewer;
+  if (['pdf'].includes(type)) return PdfViewer;
   return null;
 });
 

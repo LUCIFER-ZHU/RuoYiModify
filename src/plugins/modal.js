@@ -77,6 +77,8 @@ export default {
   },
   // 关闭遮罩层
   closeLoading() {
-    loadingInstance.close();
+    if (loadingInstance) {
+      loadingInstance.close();
+    }
   }
 }

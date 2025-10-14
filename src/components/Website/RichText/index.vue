@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-  import '@wangeditor-next/editor/dist/css/style.css' // 引入 css
+import '@wangeditor-next/editor/dist/css/style.css' // 引入 css
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
 import { getToken } from "@/utils/auth";
 import { ElMessage } from "element-plus";
@@ -48,7 +48,7 @@ const editorRef = shallowRef()
 const height = ref(props.height)
 
 // 内容 HTML
-const valueHtml = ref('')
+const valueHtml = ref(props.modelValue || '<p></p>')
 
 // 图片预览状态
 const imgPreviewVisible = ref(false)
@@ -66,8 +66,16 @@ watch(
 watch(
   () => props.modelValue,
   (newValue) => {
-    if (newValue !== valueHtml.value) {
-      valueHtml.value = newValue
+    const editor = editorRef.value
+    if (editor) {
+      // 只有当内容真正不同时才设置，避免不必要的更新
+      const currentHtml = editor.getHtml()
+      if (currentHtml !== newValue) {
+        editor.setHtml(newValue || '')
+      }
+    } else {
+      // 如果editor还没创建，更新valueHtml
+      valueHtml.value = newValue || '<p></p>'
     }
   },
   { immediate: true }
@@ -113,7 +121,7 @@ const editorConfig = {
         let fileObj = Object.values(file)[0].data
         const isJPG = fileObj.type == 'image/jpg' || fileObj.type == 'image/jpeg' || fileObj.type == 'image/png'
         if (!isJPG) {
-         ElMessage.warn('图片只能是 JPG、GIF、PNG 格式!')
+          ElMessage.warn('图片只能是 JPG、GIF、PNG 格式!')
         }
         // 判断图片宽高
         // 定义 filereader对象
@@ -121,7 +129,7 @@ const editorConfig = {
         // 判断图片大小
         let isLt = fileObj.size / 1024 / 1024 < 5 // 判断是否小于5M
         if (!isLt) {
-         ElMessage.warn('图片大小不能超过5M! 请重新上传')
+          ElMessage.warn('图片大小不能超过5M! 请重新上传')
         }
         console.log(file, 'before')
         console.log('isJPG, isSize, sisLt', isJPG, isLt)
@@ -297,6 +305,11 @@ const handleCreated = (editor) => {
     editor.enable()
   }
 
+  // 编辑器创建完成后，如果有初始内容则设置
+  if (props.modelValue) {
+    editor.setHtml(props.modelValue)
+  }
+
   // 绑定图片点击预览：使用官方 API 获取可编辑容器并代理 <img> 点击
   try {
     const contentArea = editor.getEditableContainer && editor.getEditableContainer();
@@ -326,9 +339,11 @@ const handleDestroyed = (editor) => {
   // console.log('destroyed', editor)
   // 卸载图片点击事件
   try {
-    unbindImgClick && unbindImgClick();
+    if (unbindImgClick) {
+      unbindImgClick();
+    }
     unbindImgClick = null;
-  } catch (_) {}
+  } catch (_) { }
 }
 const handleFocus = (editor) => {
   //  console.log('focus', editor)
