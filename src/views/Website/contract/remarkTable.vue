@@ -130,11 +130,6 @@
         <el-button type="primary" @click="handleRejectConfirm">确定</el-button>
       </template>
     </el-dialog>
-    <CollectDetailDialog
-      v-model:visible="collectDetailDialogVisible"
-      :contract-id="currentContractId"
-      :contract-dicts="contractDicts"
-    />
   </div>
 </template>
 
@@ -147,7 +142,6 @@ const { proxy } = getCurrentInstance();
 import { getCountryNameUtil } from '@/utils/displayHelpers';
 import { handlePreviewPdf } from '@/utils/previewPdf';
 import { createContractPdf } from '@/api/Website/contract';
-import CollectDetailDialog from '@/views/Website/components/finance/collectDetailDialog.vue';
 
 const contractList = ref([]);
 const rejectDialogOpen = ref(false);

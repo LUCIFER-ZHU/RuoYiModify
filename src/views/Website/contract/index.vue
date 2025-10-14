@@ -169,13 +169,6 @@
     <!-- 收款弹窗 -->
     <collectDialog v-model:visible="collectDialogVisible" :row="collectRow" :contract-dicts="contractDicts" @submit-success="handleCollectSuccess" />
 
-    <!-- 收款详情弹窗 -->
-    <CollectDetailDialog
-      v-model:visible="collectDetailDialogVisible"
-      :contract-id="currentContractId"
-      :contract-dicts="contractDicts"
-    />
-
     <!-- 审核详情弹窗 -->
     <CheckListDialog
       v-model:visible="checkListDialogVisible"
@@ -189,7 +182,6 @@ import { listContract, getContract, delContract, submitContract, createContractP
 import DetailDialog from "@/views/Website/components/contract/detailDialog.vue";
 import FormDialog from "@/views/Website/components/contract/formDialog.vue";
 import collectDialog from '@/views/Website/components/contract/collectDialog.vue';
-import CollectDetailDialog from '@/views/Website/components/finance/collectDetailDialog.vue';
 import CheckListDialog from '@/views/Website/components/contract/checkListDialog.vue';
 import { useDictMn } from "@/utils/dictMn";
 import { reactive, onMounted, watchEffect } from "vue";
