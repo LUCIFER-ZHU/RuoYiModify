@@ -26,19 +26,6 @@ export default defineConfig(({ mode, command }) => {
       //     gzipSize: true,
       //     brotliSize: true
       //   }),
-
-      // gzip 压缩
-      viteCompression({
-        algorithm: 'gzip',
-        ext: '.gz',
-        deleteOriginFile: false // 保留源文件，Nginx 自动选择 gzip
-      }),
-      // brotli 压缩
-      viteCompression({
-        algorithm: 'brotliCompress',
-        ext: '.br',
-        deleteOriginFile: false
-      })
     ],
     resolve: {
       alias: {
@@ -62,7 +49,12 @@ export default defineConfig(({ mode, command }) => {
           manualChunks: {
             vue: ['vue', 'vue-router', 'pinia'],
             echarts: ['echarts'],
-            utils: ['axios', 'lodash-es', 'js-cookie']
+            utils: ['axios', 'lodash-es', 'js-cookie'],
+            vueOffice: [
+              '@vue-office/docx',
+              '@vue-office/excel',
+              '@vue-office/pdf'
+            ]            
           }
         }
       }
