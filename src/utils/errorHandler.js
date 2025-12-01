@@ -232,7 +232,7 @@ class ErrorCollector {
       [ERROR_TYPES.PROMISE_REJECTION]: '操作执行失败，请重试'
     };
 
-    return friendlyMessages[error.type] || '系统出现异常，请联系管理员';
+    return friendlyMessages[error.type] || error?.message || '系统出现异常，请联系管理员';
   }
 
   /**

@@ -23,7 +23,8 @@ package-lock.json
 yarn.lock
 
 # Cursor rules
-.cursor/rules/my-cursor-rule.mdc
+.cursor
+.qoder
 
 # Project documentation
 promot.md

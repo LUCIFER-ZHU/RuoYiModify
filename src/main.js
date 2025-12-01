@@ -55,6 +55,7 @@ import ImageUploadGrid from "@/components/Website/ImageUploadGrid"
 import DictTagMn from "@/components/Website/DictTagMn"
 import RichTextMn from "@/components/Website/RichText"
 import FileUploadMn from "@/components/Website/FileUploadMn"
+import WhatsappChatRecordDialog from "@/components/Website/whatsappChatRecordDialog"
 // 异步组件
 const asyncComponents = {
   DocumentPreviewMn: () => import('@/components/Website/DocumentPreviewMn'),
@@ -93,6 +94,7 @@ app.component('ImageUploadGrid', ImageUploadGrid)
 app.component('DictTagMn', DictTagMn)
 app.component('RichTextMn', RichTextMn)
 app.component('FileUploadMn', FileUploadMn)
+app.component('WhatsappChatRecordDialog', WhatsappChatRecordDialog)
 // 遍历注册异步组件
 Object.entries(asyncComponents).forEach(([name, loader]) => {
   app.component(name, defineAsyncComponent(loader))

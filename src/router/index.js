@@ -84,6 +84,12 @@ export const constantRoutes = [
       }
     ]
   }
+  // {
+  //   path: '/websocket-example',
+  //   component: () => import('@/components/Website/WebSocketExample'),
+  //   name: 'WebSocketExample',
+  //   meta: { title: 'WebSocket 示例' }
+  // }  
 ]
 
 // 动态路由，基于用户权限动态去加载

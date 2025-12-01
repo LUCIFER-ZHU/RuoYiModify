@@ -27,6 +27,9 @@ export default defineConfig(({ mode, command }) => {
       //     brotliSize: true
       //   }),
     ],
+    define: {
+      global: 'globalThis'
+    },    
     resolve: {
       alias: {
         '~': path.resolve(__dirname, './'),
