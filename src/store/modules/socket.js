@@ -108,15 +108,13 @@ const useSocketStore = defineStore("socket", {
 
                 console.log("🔌 开始建立 WebSocket 连接...", { wsUrl, userId });
 
-                // 创建 SockJS 实例
-                const socket = new SockJS(wsUrl, null, {
-                    withCredentials: true, // 默认是 true
-                });
-
                 // 创建 STOMP 客户端
                 const client = new Client({
-                    // WebSocket 工厂函数
-                    webSocketFactory: () => socket,
+                    // WebSocket 工厂函数 - 每次重连都创建新的 SockJS 实例
+                    // 注意：不能在外部创建 socket 实例再返回，否则重连时会复用已关闭的连接
+                    webSocketFactory: () => new SockJS(wsUrl, null, {
+                        withCredentials: true, // 携带 Cookie
+                    }),
 
                     // 连接头信息（携带 token）
                     connectHeaders: {

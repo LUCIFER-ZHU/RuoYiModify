@@ -428,6 +428,12 @@ class ErrorHandler {
    */
   static registerGlobalErrorHandler() {
     window.addEventListener('error', (event) => {
+      // 忽略 ResizeObserver 错误（这是浏览器的一个已知问题，不影响功能）
+      if (event.message && event.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+        event.stopImmediatePropagation();
+        return;
+      }
+      
       // 脚本错误
       if (event.filename) {
         errorCollector.collect({

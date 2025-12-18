@@ -25,6 +25,7 @@ yarn.lock
 # Cursor rules
 .cursor
 .qoder
+.github
 
 # Project documentation
 promot.md
