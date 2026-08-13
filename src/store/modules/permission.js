@@ -16,9 +16,17 @@ const usePermissionStore = defineStore(
       addRoutes: [],
       defaultRoutes: [],
       topbarRouters: [],
-      sidebarRouters: []
+      sidebarRouters: [],
+      sidebarBadges: {},
+      refreshSignals: {}
     }),
     actions: {
+      setSidebarBadge(menuId, count) {
+        this.sidebarBadges[menuId] = count
+      },
+      triggerRefresh(menuId) {
+        this.refreshSignals[menuId] = Date.now()
+      },
       setRoutes(routes) {
         this.addRoutes = routes
         this.routes = constantRoutes.concat(routes)

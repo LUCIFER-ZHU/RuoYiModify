@@ -6,6 +6,9 @@
 
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
+        <!-- 设备云同步任务图标 -->
+        <SyncTaskPanel />
+
         <!-- 系统通知小铃铛 -->
         <SystemNotification />
         
@@ -70,6 +73,7 @@ import HeaderSearch from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
 import SystemNotification from '@/components/Website/SystemNotification'
+import SyncTaskPanel from '@/components/Website/SyncTaskPanel'
 import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": false,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "noEmit": true
+  },
+  "include": ["src/**/*.vue", "src/**/*.ts"]
+}

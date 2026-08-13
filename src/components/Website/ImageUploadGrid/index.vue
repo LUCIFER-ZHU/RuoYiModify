@@ -11,15 +11,8 @@
             <span class="file-name">{{ file.name || getFileName(file.url) }}</span>
           </div>
           <div v-else class="image-file-item">
-            <el-image 
-              :src="file.url" 
-              :alt="file.name" 
-              class="file-preview"
-              :preview-src-list="imageList"
-              :initial-index="imageList.indexOf(file.url)"
-              :preview-teleported="true"
-              fit="cover"
-            />
+            <el-image :src="file.url" :alt="file.name" class="file-preview" :preview-src-list="imageList"
+              :initial-index="imageList.indexOf(file.url)" :preview-teleported="true" fit="cover" />
           </div>
           <el-button v-if="!disabled" type="danger" size="small" class="delete-btn" @click.stop="handleDelete(file)"
             icon="Delete" />
@@ -50,9 +43,9 @@
     </div>
 
     <!-- 预览pdf弹窗 -->
-    <el-dialog v-model="dialogVisible" title="预览" width="800px" append-to-body>
+    <el-dialog v-model="dialogVisible" title="预览" width="75%" append-to-body>
       <iframe v-if="isPdfFile(dialogImageUrl)" :src="dialogImageUrl"
-        style="width: 100%; height: 600px; border: none;" />
+        style="width: 100%; height: 750px; border: none;" />
       <div v-else style="text-align: center; padding: 50px;">
         <p>该文件类型不支持预览</p>
         <el-button type="primary" @click="downloadFile(dialogImageUrl)">下载文件</el-button>
@@ -85,7 +78,7 @@ const props = defineProps({
   // 大小限制(MB)
   fileSize: {
     type: Number,
-    default: 10,
+    default: 3,
   },
   // 文件类型（MIME），例如 ['image/png', 'image/jpeg', 'application/pdf']
   fileType: {
@@ -159,7 +152,7 @@ watch(() => props.modelValue, val => {
       }
       return item;
     });
-    
+
     // 如果输入的是数组格式，立即转换为字符串格式发送给父组件
     if (Array.isArray(val)) {
       emit("update:modelValue", listToString(fileList.value));
@@ -302,7 +295,7 @@ function listToString(list, separator) {
   const urlList = list
     .filter(item => item && item.url && item.url.indexOf("blob:") !== 0)
     .map(item => item.url.replace(baseUrl, ""));
-  
+
   return urlList.join(separator);
 }
 
@@ -391,6 +384,7 @@ function getFileName(url) {
 
 .upload-image-list {
   display: flex;
+  flex-wrap: wrap;
 }
 
 // 自定义文件列表样式
@@ -399,6 +393,8 @@ function getFileName(url) {
   flex-wrap: wrap;
   gap: 8px;
   margin-right: 8px;
+  justify-content: center;
+  align-items: center;
 }
 
 .custom-file-item {

@@ -52,10 +52,13 @@ import DictTag from '@/components/DictTag'
 // 自定义
 // 图片上传组件
 import ImageUploadGrid from "@/components/Website/ImageUploadGrid"
+import ImageUploadGridWMark from "@/components/Website/ImageUploadGridWMark"
 import DictTagMn from "@/components/Website/DictTagMn"
 import RichTextMn from "@/components/Website/RichText"
 import FileUploadMn from "@/components/Website/FileUploadMn"
 import WhatsappChatRecordDialog from "@/components/Website/whatsappChatRecordDialog"
+import ElectronicSignature from "@/components/Website/ElectronicSignature"
+import HtmlPreviewDialog from "@/components/Website/HtmlPreviewDialog"
 // 异步组件
 const asyncComponents = {
   DocumentPreviewMn: () => import('@/components/Website/DocumentPreviewMn'),
@@ -91,10 +94,13 @@ app.component('Editor', Editor)
 
 // 自定义
 app.component('ImageUploadGrid', ImageUploadGrid)
+app.component('ImageUploadGridWMark', ImageUploadGridWMark)
 app.component('DictTagMn', DictTagMn)
 app.component('RichTextMn', RichTextMn)
 app.component('FileUploadMn', FileUploadMn)
 app.component('WhatsappChatRecordDialog', WhatsappChatRecordDialog)
+app.component('ElectronicSignature', ElectronicSignature)
+app.component('HtmlPreviewDialog', HtmlPreviewDialog)
 // 遍历注册异步组件
 Object.entries(asyncComponents).forEach(([name, loader]) => {
   app.component(name, defineAsyncComponent(loader))

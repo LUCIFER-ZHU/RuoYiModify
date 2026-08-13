@@ -58,20 +58,19 @@ const imgPreviewUrl = ref('')
 let unbindImgClick = null
 
 watch(
-  () => valueHtml.value,
-  (newValue) => {
-    emit('update:modelValue', newValue)
-  }
-)
-watch(
   () => props.modelValue,
   (newValue) => {
     const editor = editorRef.value
     if (editor) {
+      // 如果编辑器已经获得焦点，说明是用户在输入，绝对不要调用 setHtml
+      if (editor.isFocused()) return
       // 只有当内容真正不同时才设置，避免不必要的更新
       const currentHtml = editor.getHtml()
+
       if (currentHtml !== newValue) {
-        editor.setHtml(newValue || '')
+        nextTick(() => {
+          editor.setHtml(newValue || '')
+        })
       }
     } else {
       // 如果editor还没创建，更新valueHtml
@@ -333,7 +332,11 @@ const handleCreated = (editor) => {
   }
 }
 const handleChange = (editor) => {
-  // console.log('change:', editor.getHtml())
+  const html = editor.getHtml()
+  // 只有内容确实变了才 emit，减少不必要的父组件渲染
+  if (props.modelValue !== html) {
+    emit('update:modelValue', html)
+  }
 }
 const handleDestroyed = (editor) => {
   // console.log('destroyed', editor)

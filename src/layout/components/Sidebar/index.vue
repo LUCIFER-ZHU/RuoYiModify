@@ -31,11 +31,31 @@ import variables from '@/assets/styles/variables.module.scss'
 import useAppStore from '@/store/modules/app'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
+import useUserStore from '@/store/modules/user'
+import { useTopicSubscription } from '@/utils/socketClient'
 
 const route = useRoute();
 const appStore = useAppStore()
 const settingsStore = useSettingsStore()
 const permissionStore = usePermissionStore()
+const userStore = useUserStore()
+
+// 订阅菜单徽标更新主题
+// 后端推送格式示例: { ContractCollection: 5, ContractRemark: 0, ... }
+useTopicSubscription(`/topic/business/user/${userStore.id}`, (data) => {
+  try {
+    if (data && typeof data === 'object') {
+      Object.entries(data).forEach(([menuId, count]) => {
+        // 更新徽标
+        permissionStore.setSidebarBadge(menuId, count)
+        // 触发自动刷新事件 (存入 store)
+        permissionStore.triggerRefresh(menuId)
+      })
+    }
+  } catch (error) {
+    console.error('处理菜单徽标消息失败:', error)
+  }
+})
 
 const sidebarRouters = computed(() => permissionStore.sidebarRouters);
 const showLogo = computed(() => settingsStore.sidebarLogo);

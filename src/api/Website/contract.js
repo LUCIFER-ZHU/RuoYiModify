@@ -1,9 +1,19 @@
 import request from '@/utils/request'
 
+// 生成合同HTML
+export function createContractHtml(contractId) {
+  return request({
+    url: '/business/contract/createHtml',
+    method: 'get',
+    params: { contractId },
+    responseType: 'blob'
+  })
+}
+
 // 查询合同列表
 export function listContract(query) {
   return request({
-    url: '/business/contract/list',
+    url: '/business/contractFinance/contract/list',
     method: 'get',
     params: query
   })
@@ -97,7 +107,7 @@ export function remarkContract(data){
 // 收款合同
 export function collectContract(data){
   return request({
-    url: '/business/contract/collection',
+    url: '/business/contractFinance/contract/collection',
     method: 'post',
     data: data
   })
@@ -122,7 +132,7 @@ export function createContractPdf(contractId){
  */
 export function exportContracts(ids) {
   return request({
-    url: '/business/contract/export',
+    url: '/business/contractFinance/contract/export',
     method: 'get',
     params: {ids},
     responseType: 'blob'
@@ -136,7 +146,7 @@ export function exportContracts(ids) {
  */
 export function getCheckHistoryList(contractId){
   return request({
-    url: '/business/contract/checkHistoryList',
+    url: '/business/contractFinance/contract/checkHistoryList',
     method: 'get',
     params: {contractId}
   })
@@ -152,4 +162,58 @@ export function delContractProduct(id) {
     url: '/business/contract/product/' + id,
     method: 'delete',
   });
+}
+
+/**
+ * 完结合同
+ * @param {string} id - 合同ID
+ * @returns {Promise} - 请求Promise
+ */
+export function completeContract(id) {
+  return request({
+    url: '/business/contractFinance/contract/applicationCompleted/' + id,
+    method: 'get'
+  });
+}
+
+
+/**
+ * 已完结的合同
+ * @param {*} id 
+ * @returns 
+ */
+export function getCompletedContractList(id){
+  return request({
+    url: '/business/contract/finishedContractList',
+    method: 'get',
+    params: {
+      userId: id
+    }
+  })
+}
+
+/**
+ * 默认审核指定合同
+ * @param {string|number} contractId 合同编号（必填）
+ * @returns {Promise} 请求 Promise
+ */
+export function defaultCheck(contractId) {
+  return request({
+    url: '/business/contract/defaultCheck',
+    method: 'post',
+    data: { contractId }
+  })
+}
+
+/**
+ * 获取合同修改记录
+ * @param {string} contractId - 合同编号（必填）
+ * @returns {Promise} 请求 Promise
+ */
+export function getContractUpdateRecords(contractId) {
+  return request({
+    url: '/business/contract/updateRecords',
+    method: 'get',
+    params: { contractId }
+  })
 }

@@ -1,90 +1,71 @@
 <template>
   <div class="dict-tag-mn">
-    <template v-for="(item, index) in options">
-      <template v-if="values.includes(Number(item.value))">
-        <span
-          v-if="(item.elTagType == 'default' || item.elTagType == '') && (item.elTagClass == '' || item.elTagClass == null)"
-          :key="item.value"
-          :index="index"
-          :class="item.elTagClass"
-        >{{ item.label + " " }}</span>
-        <el-tag
-          v-else
-          :disable-transitions="true"
-          :key="item.value + ''"
-          :index="index"
-          :type="item.elTagType"
-          :class="item.elTagClass"
-        >{{ item.label + " " }}</el-tag>
-      </template>
+    <template v-for="item in matchedOptions" :key="item.value">
+      <span
+        v-if="(item.elTagType === 'default' || !item.elTagType) && !item.elTagClass"
+        :class="item.elTagClass"
+      >
+        {{ item.label + " " }}
+      </span>
+      <el-tag
+        v-else
+        :disable-transitions="true"
+        :type="item.elTagType"
+        :class="item.elTagClass"
+      >
+        {{ item.label + " " }}
+      </el-tag>
     </template>
-    <template v-if="unmatch && showValue">
-      {{ unmatchArray | handleArray }}
+    
+    <template v-if="showValue && unmatchedValues.length > 0">
+      {{ unmatchedValues.join(' ') }}
     </template>
   </div>
 </template>
 
 <script setup>
-// 记录未匹配的项
-const unmatchArray = ref([]);
+import { computed, ref } from 'vue';
 
 const props = defineProps({
-  // 数据
-  options: {
-    type: Array,
-    default: null,
-  },
-  // 当前的值
+  options: { type: Array, default: () => [] }, // 初始值给空数组避免 null 报错
   value: [Number, String, Array],
-  // 当未找到匹配的数据时，显示value
-  showValue: {
-    type: Boolean,
-    default: true,
-  },
-  separator: {
-    type: String,
-    default: ",",
-  }
+  showValue: { type: Boolean, default: true },
+  separator: { type: String, default: "," }
 });
 
-const values = computed(() => {
-  if (props.value === null || typeof props.value === 'undefined' || props.value === '') return [];
-  if (Array.isArray(props.value)) {
-    return props.value.map(item => typeof item === 'string' ? Number(item) : item);
-  }
-  // 如果是字符串，按分隔符分割后转为数字
-  if (typeof props.value === 'string') {
-    return props.value.split(props.separator).map(item => Number(item.trim()));
-  }
-  // 如果是数字，直接返回数组
-  return [Number(props.value)];
+// 规范化当前选中的值
+const normalizedValues = computed(() => {
+  if (props.value === null || props.value === undefined || props.value === '') return [];
+  const valArray = Array.isArray(props.value) ? props.value : String(props.value).split(props.separator);
+  return valArray.map(v => String(v).trim()); // 统一转成字符串处理比较稳妥
 });
 
-const unmatch = computed(() => {
-  unmatchArray.value = [];
-  // 没有value不显示
-  if (props.value === null || typeof props.value === 'undefined' || props.value === '' || !Array.isArray(props.options) || props.options.length === 0) return false
-  // 传入值为数组
-  let unmatch = false // 添加一个标志来判断是否有未匹配项
-  values.value.forEach(item => {
-    if (!props.options.some(v => Number(v.value) === Number(item))) {
-      unmatchArray.value.push(item)
-      unmatch = true // 如果有未匹配项，将标志设置为true
-    }
-  })
-  return unmatch // 返回标志的值
+// 获取匹配到的选项
+const matchedOptions = computed(() => {
+  if (!Array.isArray(props.options)) return [];
+  return props.options.filter(opt => 
+    normalizedValues.value.includes(String(opt.value))
+  );
 });
 
-function handleArray(array) {
-  if (array.length === 0) return "";
-  return array.reduce((pre, cur) => {
-    return pre + " " + cur;
-  });
-}
+// 获取未匹配到的原始值 (替代之前的 unmatch 副作用逻辑)
+const unmatchedValues = computed(() => {
+  if (!props.showValue || !Array.isArray(props.options)) return [];
+  return normalizedValues.value.filter(val => 
+    !props.options.some(opt => String(opt.value) === val)
+  );
+});
 </script>
 
 <style scoped>
-.el-tag + .el-tag {
+/* 确保多个标签之间有水平间距 */
+.dict-tag-mn .el-tag + .el-tag {
+  margin-left: 10px;
+}
+
+/* 如果未匹配的文字紧跟在标签后面，也可以加点间距 */
+.dict-tag-mn .el-tag + span,
+.dict-tag-mn span + .el-tag {
   margin-left: 10px;
 }
 </style>
