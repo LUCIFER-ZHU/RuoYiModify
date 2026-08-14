@@ -57,19 +57,6 @@ export const constantRoutes = [
     component: () => import('@/views/error/401'),
     hidden: true
   },
-  // 工序计时器（移动端独立页面，无侧边栏）
-  {
-    path: '/process-timer',
-    component: () => import('@/views/Website/processTimer/index'),
-    name: 'ProcessTimer',
-    hidden: true
-  },
-  // {
-  //   path: '/other-page',
-  //   component: () => import('@/views/Website/otherPage/index.vue'),
-  //   name: 'OtherPage',
-  //   hidden: true
-  // },
   {
     path: '',
     component: Layout,
