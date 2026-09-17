@@ -14,7 +14,7 @@ import request from '@/utils/request'
  * @param {string} data.machine_name - 机器名称（必填）
  * @param {string} [data.sn] - 机器序列号
  * @param {string} [data.description] - 机器备注
- * @param {string} [data.contract_id] - 所属合同 UUID
+ * @param {string} [data.contract_id] - 所属合同号
  * @returns {Promise} - 请求Promise
  */
 export function createMachine(data) {
@@ -110,6 +110,32 @@ export function updateDevice(data) {
 }
 
 /**
+ * 根据设备 ID 查询设备详情（用于编辑回显）
+ * @param {string} deviceId - 设备 UUID
+ * @returns {Promise} - 请求Promise，data 结构与编辑请求一致
+ */
+export function getDeviceDetail(deviceId) {
+  return request({
+    url: '/iotda/device/detail',
+    method: 'get',
+    params: { device_id: deviceId }
+  })
+}
+
+/**
+ * 复制设备属性结构模板（按 service_id 分组）
+ * @param {string} deviceId - 设备 UUID
+ * @returns {Promise} - 请求Promise
+ */
+export function copyDeviceProperty(deviceId) {
+  return request({
+    url: '/iotda/device/copyProperty',
+    method: 'get',
+    params: { deviceId }
+  })
+}
+
+/**
  * 删除设备（逻辑删除，同时删除属性与命令定义）
  * @param {string} deviceId - 设备 UUID
  * @returns {Promise} - 请求Promise
@@ -119,6 +145,47 @@ export function deleteDevice(deviceId) {
     url: '/iotda/device/delete',
     method: 'delete',
     data: { device_id: deviceId }
+  })
+}
+
+/**
+ * 对指定设备下发 ping 并等待 pong 回包，测试连通性
+ * @param {string} deviceId - 设备 UUID
+ * @returns {Promise} - 请求Promise，data 含 success、elapsed_ms、device_status、message 等
+ */
+export function pingDevice(deviceId) {
+  return request({
+    url: `/iotda/device/ping/${deviceId}`,
+    method: 'post'
+  })
+}
+
+/**
+ * 获取一次性临时 RSA 公钥（用于 MQTT 密码协商，60 秒有效）
+ * @param {string} deviceId - 设备 UUID
+ * @returns {Promise} - 请求Promise，data 为 X.509 公钥 PEM 字符串
+ */
+export function getDeviceRsaPublicKey(deviceId) {
+  return request({
+    url: `/iotda/device/rsa/${deviceId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取 AES-256-GCM 加密后的 MQTT 密码密文
+ * @param {string} deviceId - 设备 UUID
+ * @param {string} xRsaKey - 用临时公钥 RSA 加密后的 AES 密钥（Base64），写入请求头 X-RSA-KEY
+ * @returns {Promise} - 请求Promise，data 为 Base64(nonce||ciphertext||tag)
+ */
+export function getEncryptedMqttPassword(deviceId, xRsaKey) {
+  return request({
+    url: `/iotda/device/mqtt/password/${deviceId}`,
+    method: 'post',
+    headers: {
+      'X-RSA-KEY': xRsaKey,
+      repeatSubmit: false
+    }
   })
 }
 
@@ -145,13 +212,25 @@ export function listDevices(query) {
 /**
  * 向设备下发指令
  * @param {string} deviceId - 设备 ID
- * @param {string} commendId - 命令 ID
+ * @param {string} commandId - 命令 ID
  * @returns {Promise} - 请求Promise
  */
-export function commendDown(deviceId, commendId) {
+export function commendDown(deviceId, commandId) {
   return request({
-    url: `/device/command/down/${deviceId}/${commendId}`,
+    url: `/device/command/down/${deviceId}/${commandId}`,
     method: 'post'
+  })
+}
+
+/**
+ * 查询设备可下发指令列表
+ * @param {string} deviceId - 设备 ID
+ * @returns {Promise} - 请求Promise
+ */
+export function listDeviceCommands(deviceId) {
+  return request({
+    url: `/device/command/list/${deviceId}`,
+    method: 'get'
   })
 }
 
@@ -164,6 +243,7 @@ export function commendDown(deviceId, commendId) {
  * @param {string} query.start_time - 开始时间（ISO 8601）
  * @param {string} query.end_time - 结束时间（ISO 8601）
  * @param {string} [query.log_level] - 日志等级（可多选逗号分隔）
+ * @param {string} [query.log_type] - 日志类型
  * @param {number} [query.current=1] - 页码
  * @param {number} [query.size=20] - 每页数量
  * @returns {Promise} - 请求Promise
@@ -173,6 +253,32 @@ export function queryDeviceLogs(query) {
     url: '/iotda/device-log/query',
     method: 'get',
     params: query
+  })
+}
+
+// ==================== 资源下载 ====================
+
+/**
+ * 下载 GlobalSign 根证书（客户端证书）
+ * @returns {Promise<Blob>} - 证书文件 blob
+ */
+export function downloadIotdaCert() {
+  return request({
+    url: '/iotda/file/download/cert',
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 下载海为示例工程
+ * @returns {Promise<Blob>} - 示例工程文件 blob
+ */
+export function downloadIotdaExample() {
+  return request({
+    url: '/iotda/file/download/example',
+    method: 'get',
+    responseType: 'blob'
   })
 }
 

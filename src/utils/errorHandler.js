@@ -368,6 +368,19 @@ class ErrorCollector {
 const errorCollector = new ErrorCollector();
 
 /**
+ * 判断是否为 axios / request 层错误（拦截器已负责 toast）
+ * @param {*} reason - Promise rejection reason
+ * @returns {boolean} - 是否为 request 层错误
+ */
+function isAxiosOrRequestError(reason) {
+  if (!reason || typeof reason !== 'object') return false
+  if (reason.isAxiosError) return true
+  if (reason.config && (reason.config.url != null || reason.config.baseURL != null)) return true
+  if (reason.response != null) return true
+  return false
+}
+
+/**
  * 错误处理器主类
  */
 class ErrorHandler {
@@ -508,13 +521,17 @@ class ErrorHandler {
         '操作执行失败，请重试'
       );
 
-      // 立即弹出错误原因提示，避免只显示通用文案
-      ElMessage({ message: userMessage, type: 'error', showClose: true, duration: 5000 });
+      // axios / request 错误已由 request.js 拦截器提示，此处仅记录
+      const handledByRequestInterceptor = isAxiosOrRequestError(reason)
 
-      // 避免重复弹窗：标记本条错误跳过通知中心的二次提示
-      errorInfo.extra = Object.assign({}, errorInfo.extra, { skipUserNotification: true });
+      if (!handledByRequestInterceptor) {
+        ElMessage({ message: userMessage, type: 'error', showClose: true, duration: 5000 })
+      }
 
-      errorCollector.collect(errorInfo);
+      // 跳过 collect 内二次 toast
+      errorInfo.extra = Object.assign({}, errorInfo.extra, { skipUserNotification: true })
+
+      errorCollector.collect(errorInfo)
     });
   }
 

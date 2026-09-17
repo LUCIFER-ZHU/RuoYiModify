@@ -7,7 +7,7 @@
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
         <!-- 设备云同步任务图标 -->
-        <SyncTaskPanel />
+        <!-- <SyncTaskPanel /> -->
 
         <!-- 系统通知小铃铛 -->
         <SystemNotification />

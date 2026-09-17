@@ -217,3 +217,19 @@ export function getContractUpdateRecords(contractId) {
     params: { contractId }
   })
 }
+
+/**
+ * 查询合同分页列表（用于合同选择器）
+ * @param {Object} query - 查询参数
+ * @param {string} [query.contractId] - 合同号模糊查询
+ * @param {number} [query.current=1] - 页码
+ * @param {number} [query.size=20] - 每页数量
+ * @returns {Promise} 请求 Promise
+ */
+export function queryContractPage(query) {
+  return request({
+    url: '/business/contract/queryPage',
+    method: 'get',
+    params: query
+  })
+}

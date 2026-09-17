@@ -25,9 +25,21 @@
 
 ### Error Handling
 - **Components**: async/await + try-catch mandatory
-- **API interfaces**: no try-catch
-- Central error handler: `src/utils/errorHandler.js`
-- Use ElMessage/ElNotification for errors
+- **API modules** (`src/api/**`): no try-catch; let errors propagate to callers
+- **Global axios interceptor** (`src/utils/request.js`) is the single source of truth for API error toasts:
+  - HTTP errors (4xx/5xx, network, timeout): shown via `ElMessage` in the error interceptor
+  - Business errors (HTTP 200 but `code !== 200`): shown via `ElMessage` / `ElNotification` in the response interceptor, then `Promise.reject(...)`
+- **Do NOT duplicate error toasts in components** when calling APIs wrapped by `request`:
+  - `Promise.reject(...)` from the interceptor causes `await` to throw → execution jumps to `catch`, **not** an `else` branch after `await`
+  - Therefore `else { ElMessage.error(...) }` after `if (res.code === 200)` is usually dead code and should be avoided
+  - In `catch`, log or run cleanup only; do not call `ElMessage.error` again unless the error is local (form validation, non-axios logic)
+- **Components should still handle**:
+  - Success messages (`ElMessage.success`)
+  - Loading / submitting state (`finally`)
+  - Local validation errors
+  - Post-error UI behavior (keep dialog open, reset form, etc.)
+- Optional reference: `src/utils/errorHandler.js` for non-request errors
+- **`errorHandler.js` unhandledrejection**: axios/request errors are logged only (no toast); `request.js` interceptor already notified the user
 
 ### Comments & Patterns
 - Magic numbers/regex need inline comments

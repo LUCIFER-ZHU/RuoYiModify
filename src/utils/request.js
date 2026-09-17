@@ -11,6 +11,28 @@ let downloadLoadingInstance;
 // 是否显示重新登录
 export let isRelogin = { show: false };
 
+/**
+ * 从 axios 错误响应中提取后端 message
+ * @param {Object} error - axios 错误对象
+ * @returns {string|undefined} - 后端错误信息
+ */
+function getBackendErrorMessage(error) {
+  const data = error?.response?.data
+  if (!data) return undefined
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data)
+      return parsed.message || parsed.msg || parsed?.data?.message || parsed?.data?.msg
+    } catch {
+      return data
+    }
+  }
+  if (typeof data === 'object') {
+    return data.message || data.msg || data?.data?.message || data?.data?.msg
+  }
+  return undefined
+}
+
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
@@ -118,9 +140,12 @@ service.interceptors.response.use(res => {
   error => {
     console.log('err' + error)
     let { message } = error;
+    const backendMessage = getBackendErrorMessage(error)
     // 拼接请求的完整URL（baseURL + url），便于定位问题
     const fullUrl = ((error && error.config && (error.config.baseURL || '')) || '') + ((error && error.config && error.config.url) || '')
-    if (message == "Network Error") {
+    if (backendMessage) {
+      message = backendMessage
+    } else if (message == "Network Error") {
       message = "后端接口连接异常" + (fullUrl ? `（${fullUrl}）` : "");
     } else if (message.includes("timeout")) {
       message = "系统接口请求超时" + (fullUrl ? `（${fullUrl}）` : "");
@@ -153,8 +178,8 @@ export function download(url, params, filename, config) {
     }
     downloadLoadingInstance.close();
   }).catch((r) => {
+    // HTTP 错误已由 axios 拦截器统一提示
     console.error(r)
-    ElMessage.error('下载文件出现错误，请联系管理员！')
     downloadLoadingInstance.close();
   })
 }

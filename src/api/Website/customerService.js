@@ -50,6 +50,20 @@ export function updateCustomerScore(data) {
 }
 
 /**
+ * 按打分周期和客户ID查询扣分记录
+ * @param {string} customerId - 客户ID
+ * @param {string} cycleId - 打分周期ID
+ * @returns {Promise} 请求Promise
+ */
+export function listScoreByCycle(customerId, cycleId) {
+  return request({
+    url: '/customer/score/listByCycle',
+    method: 'get',
+    params: { customerId, cycleId }
+  })
+}
+
+/**
  * 删除客服打分
  * @param {string} scoreId - 打分记录UUID
  * @returns {Promise} 请求Promise
@@ -186,5 +200,64 @@ export function getBusinessFollowUpDetail(query) {
     url: '/business/business-follow-up/detail',
     method: 'get',
     params: query
+  })
+}
+
+/**
+ * 查询业务员跟进考核详情
+ * @param {number|string} userId - 业务员用户ID
+ * @returns {Promise} 请求Promise
+ */
+export function getBusinessFollowUpUserDetails(userId) {
+  return request({
+    url: '/business/business-follow-up/userDetails/' + userId,
+    method: 'get'
+  })
+}
+
+/**
+ * 导出业务员按周期的客户得分 Excel
+ * @param {Object} params - 导出参数
+ * @param {number} params.userId - 业务员用户ID
+ * @param {string} [params.cycleId] - 打分周期ID（可选，不传则导出全部周期）
+ * @returns {Promise} 请求Promise
+ */
+export function exportCycleScore(params) {
+  return request({
+    url: '/business/business-follow-up/export',
+    method: 'get',
+    params: params,
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 统计业务员在打分周期内的客户得分情况
+ * @param {Object} params - 查询参数
+ * @param {string} params.cycleId - 打分周期ID
+ * @param {number} params.userId - 业务员用户ID
+ * @returns {Promise} 请求Promise
+ */
+export function cycleStatistics(params) {
+  return request({
+    url: '/business/business-follow-up/cycle-statistics',
+    method: 'get',
+    params: params
+  })
+}
+
+/**
+ * 查询指定客户在指定业务员、指定周期下的扣分记录
+ * @param {Object} params - 查询参数
+ * @param {number} params.userId - 业务员用户ID
+ * @param {string} params.customerId - 客户ID
+ * @param {string} params.cycleId - 打分周期ID
+ * @returns {Promise} 请求Promise
+ */
+export function cycleScoreItems(params) {
+  return request({
+    url: '/business/business-follow-up/score-list',
+    method: 'get',
+    params: params
   })
 }
